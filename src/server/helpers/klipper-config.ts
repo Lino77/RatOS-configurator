@@ -908,6 +908,8 @@ export const constructKlipperConfigHelpers = async (
 							const reminder: string[] = [];
 							reminder.push('# REMEMBER TO CALIBRATE YOUR BEACON!');
 							reminder.push('# Run BEACON_RATOS_CALIBRATE for automatic calibration.');
+							result.push('[bed_mesh]');
+							result.push(`zero_reference_position: ${config.size.x / 2},${config.size.y / 2}`);
 							extrasGenerator.addReminder(reminder.join('\n'));
 						}
 						break;
