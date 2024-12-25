@@ -18,13 +18,13 @@ install_printer_config()
 {
     report_status "Copying printer configuration"
     PRINTER_CFG="${RATOS_PRINTER_DATA_DIR}/config/printer.cfg"
-    tail -n +2 "$SCRIPT_DIR"/../configuration/templates/initial-printer.template.cfg > "$PRINTER_CFG"
+    tail -n +2 /home/pi/ratos-configurator/configuration/templates/initial-printer.template.cfg > "$PRINTER_CFG"
 }
 
 install_udev_rules()
 {
     report_status "Installing udev rules"
-    sudo ln -s "$SCRIPT_DIR"/../configuration/boards/*/*.rules /etc/udev/rules.d/
+    sudo ln -s /home/pi/ratos-configurator/configuration/boards/*/*.rules /etc/udev/rules.d/
 }
 
 verify_ready()
