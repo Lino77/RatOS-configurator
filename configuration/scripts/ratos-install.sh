@@ -4,8 +4,7 @@
 PKGLIST="python3-numpy python3-matplotlib curl git"
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "$(realpath -- "${BASH_SOURCE[0]}")" )" &> /dev/null && pwd )
-SRC_DIR=$(realpath "$SCRIPT_DIR/..")
-BASE_DIR=$(realpath "$SRC_DIR/..")
+CFG_DIR=$(realpath "$SCRIPT_DIR/..")
 
 # shellcheck source=./configuration/scripts/ratos-common.sh
 source "$SCRIPT_DIR"/ratos-common.sh
@@ -21,13 +20,13 @@ install_printer_config()
 {
     report_status "Copying printer configuration"
     PRINTER_CFG="${RATOS_PRINTER_DATA_DIR}/config/printer.cfg"
-    tail -n +2 "$BASE_DIR"/configuration/templates/initial-printer.template.cfg > "$PRINTER_CFG"
+    tail -n +2 "$CFG_DIR"/templates/initial-printer.template.cfg > "$PRINTER_CFG"
 }
 
 install_udev_rules()
 {
     report_status "Installing udev rules"
-    sudo ln -s "$BASE_DIR"/configuration/boards/*/*.rules /etc/udev/rules.d/
+    sudo ln -s "$CFG_DIR"/boards/*/*.rules /etc/udev/rules.d/
 }
 
 verify_ready()
