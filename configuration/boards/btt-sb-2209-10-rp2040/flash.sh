@@ -5,5 +5,5 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-FLASH_SCRIPT=$(realpath "$SCRIPT_DIR/../../scripts/flash-path_2040.sh")
+FLASH_SCRIPT=$(realpath "$SCRIPT_DIR/../../scripts/flash-path.sh")
 $FLASH_SCRIPT $MCU
