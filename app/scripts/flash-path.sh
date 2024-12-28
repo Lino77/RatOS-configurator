@@ -41,16 +41,16 @@ else
 			retVal=0
 		fi
 	fi
-else
-	dfuDevicesPostFlash=$(lsusb | grep -c "2e8a:0003")
-	if [ "$dfuDevicesPreFlash" -eq 0 ] && [ "$dfuDevicesPostFlash" -eq 1 ]; then
-		echo "Seems like flashing failed, but the device is still in DFU mode. Attempting to recover."
-		make flash FLASH_DEVICE=2e8a:0003
-		sleep 5
-		if [ -h "$MCU" ]; then
-			retVal=0
-		fi
-	fi
+    else
+        dfuDevicesPostFlash=$(lsusb | grep -c "2e8a:0003")
+        if [ "$dfuDevicesPreFlash" -eq 0 ] && [ "$dfuDevicesPostFlash" -eq 1 ]; then
+            echo "Seems like flashing failed, but the device is still in DFU mode. Attempting to recover."
+            make flash FLASH_DEVICE=2e8a:0003
+            sleep 5
+            if [ -h "$MCU" ]; then
+                retVal=0
+            fi
+        fi
 fi
 
 
