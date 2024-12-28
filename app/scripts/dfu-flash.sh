@@ -20,8 +20,7 @@ if dfuDevicesPostFlash=$(lsusb | grep -c "0483:df11"); then
 	if [ "$dfuDevicesPostFlash" -eq 1 ]; then
 		make flash FLASH_DEVICE=0483:df11
         fi
-else 
-   dfuDevicesPostFlash=$(lsusb | grep -c "2e8a:0003"); then
+elif dfuDevicesPostFlash=$(lsusb | grep -c "2e8a:0003"); then
 	if [ "$dfuDevicesPostFlash" -eq 1 ]; then
 		make flash FLASH_DEVICE=2e8a:0003
 	fi
