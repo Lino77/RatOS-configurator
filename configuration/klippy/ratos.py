@@ -88,7 +88,12 @@ class RatOS:
 
 		prev_cmd = self.gcode.register_command(command, None)
 		if prev_cmd is None:
-			raise self.printer.config_error("Existing command '%s' not found in RatOS override" % (command,))
+			if (command == 'TEST_RESONANCES' or command == 'SHAPER_CALIBRATE') and not self.config.has_section('resonance_tester'):
+				# No [resonance_tester] section found, don't throw an error, skip overriding.
+				logging.info("No [resonance_tester] section found, skipping override of command '%s'" % (command,))
+				return
+			else:
+				raise self.printer.config_error("Existing command '%s' not found in RatOS override" % (command,))
 		if command not in self.overridden_commands:
 			raise self.printer.config_error("Command '%s' not found in RatOS override list" % (command,))
 
@@ -285,6 +290,10 @@ class RatOS:
 					self.last_processed_file_result = data['payload']
 					printability = data['payload']['printability']
 
+					if printability == 'PROCESSOR_NOT_SUPPORTED':
+						self.console_echo('Post-processing Error: file was processed by an obsolete or future version of the RatOS postprocessor', 'error', "You can bypass the processor for this file by running BYPASS_GCODE_PROCESSING before starting the print, but there is no guarantee that it will print correctly._N__N_Reasons for failure:_N_ %s" % ("_N_".join(data['payload']['printabilityReasons'])))
+						return False
+
 					if printability == 'NOT_SUPPORTED':
 						self.console_echo('Post-processing Error: slicer version not supported', 'error', "You can allow unsupported slicers by adding the following to printer.cfg._N__N_[ratos]_N_allow_unsupported_slicer_versions: True_N__N_Reasons for failure:_N_ %s" % ("_N_".join(data['payload']['printabilityReasons'])))
 						return False
@@ -294,7 +303,8 @@ class RatOS:
 						return False
 
 					if printability == "UNKNOWN" and data['payload']['generator'] == "unknown" and self.allow_unknown_gcode_generator:
-						self.console_echo('Post-processing skipped', 'success', 'File contains gcode from an unknown/unidentified generator._N_Post processing has been skipped since you have allowed gcode from unknown generators.')
+						self.console_echo('Post-processing skipped', 'info', 'File contains gcode from an unknown/unidentified generator._N_Post processing has been skipped since gcode from unknown generators is allowed in your configuration.')
+						self.post_process_success = True
 						return True
 					
 					if printability != 'READY':
