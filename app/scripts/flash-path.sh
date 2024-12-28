@@ -1,3 +1,4 @@
+
 #!/bin/bash
 if [ "$EUID" -ne 0 ]
   then echo "ERROR: Please run as root"
@@ -16,44 +17,26 @@ if [ "$MCU" == "" ]; then
 fi
 pushd "${KLIPPER_DIR}" || exit
 service klipper stop
+dfuDevicesPreFlash=$(lsusb | grep -c "0483:df11")
 
-if dfuDevicesPreFlash=$(lsusb | grep -c "0483:df11"); then
-
-	if [ -h "$FLASH_PATH" ]; then
-		echo "Flashing $MCU at $FLASH_PATH"
-		make flash FLASH_DEVICE="$FLASH_PATH"
-	else
-	echo "$MCU does not seems to be connected, at least it was not found at $FLASH_PATH"
-	exit 1;
-	fi
-else dfuDevicesPreFlash=$(lsusb | grep -c "2e8a:0003"); then
-
-	if [ -h "$FLASH_PATH" ]; then
-		echo "Flashing $MCU at $FLASH_PATH"
-		make flash FLASH_DEVICE="$FLASH_PATH"
-	else
-	echo "$MCU does not seems to be connected, at least it was not found at $FLASH_PATH"
-	exit 1;
-	fi
+if [ -h "$FLASH_PATH" ]; then
+    echo "Flashing $MCU at $FLASH_PATH"
+    make flash FLASH_DEVICE="$FLASH_PATH"
+else
+  echo "$MCU does not seems to be connected, at least it was not found at $FLASH_PATH"
+  exit 1;
 fi
 sleep 5
+
 retVal=1
 
 if [ -h "$MCU" ]; then
 	retVal=0
-else dfuDevicesPostFlash=$(lsusb | grep -c "0483:df11"); then
+else
+	dfuDevicesPostFlash=$(lsusb | grep -c "0483:df11")
 	if [ "$dfuDevicesPreFlash" -eq 0 ] && [ "$dfuDevicesPostFlash" -eq 1 ]; then
 		echo "Seems like flashing failed, but the device is still in DFU mode. Attempting to recover."
 		make flash FLASH_DEVICE=0483:df11
-		sleep 5
-		if [ -h "$MCU" ]; then
-			retVal=0
-		fi
-	fi
-else dfuDevicesPostFlash=$(lsusb | grep -c "2e8a:0003"); then
-	if [ "$dfuDevicesPreFlash" -eq 0 ] && [ "$dfuDevicesPostFlash" -eq 1 ]; then
-		echo "Seems like flashing failed, but the device is still in DFU mode. Attempting to recover."
-		make flash FLASH_DEVICE=2e8a:0003
 		sleep 5
 		if [ -h "$MCU" ]; then
 			retVal=0
