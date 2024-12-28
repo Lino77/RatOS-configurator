@@ -16,11 +16,11 @@ fi
 pushd "${KLIPPER_DIR}" || exit
 service klipper stop
 echo "Flashing DFU device"
-if dfuDevicesPostFlash=$(lsusb | grep -c "0483:df11"); then
+if [ "$dfuDevicesPostFlash"=$(lsusb | grep -c "0483:df11")]; then
 	if [ "$dfuDevicesPostFlash" -eq 1 ]; then
 		make flash FLASH_DEVICE=0483:df11
-        fi
-elif dfuDevicesPostFlash=$(lsusb | grep -c "2e8a:0003"); then
+    fi
+elif [ "$dfuDevicesPostFlash"=$(lsusb | grep -c "2e8a:0003")]; then
 	if [ "$dfuDevicesPostFlash" -eq 1 ]; then
 		make flash FLASH_DEVICE=2e8a:0003
 	fi
