@@ -1,9 +1,9 @@
 # .github/workflows/publish.yml
-name: Publish to v2.1.x-deployment
+name: Publish to v2.1.x-tridex-deployment
 on:
   workflow_run:
     workflows: ["CI"] # runs after CI workflow
-    branches: ["v2.1.x"]
+    branches: ["v2.1.x-tridex"]
     types:
       - completed
 
@@ -24,8 +24,8 @@ jobs:
         id: variables
         shell: bash
         run: |
-          echo "target-branch=v2.1.x-deployment" >> "$GITHUB_OUTPUT"
-          echo "src-branch=v2.1.x" >> "$GITHUB_OUTPUT"
+          echo "target-branch=v2.1.x-tridex-deployment" >> "$GITHUB_OUTPUT"
+          echo "src-branch=v2.1.x-tridex" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v3
         with:
