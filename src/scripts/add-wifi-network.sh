@@ -1,119 +1,76 @@
 #!/usr/bin/env bash
-if [ ! "$EUID" -eq 0 ]; then
-	echo "This script must run as root"
-	exit 1
-fi
-NETWORK=$(sh -c "wpa_passphrase \"$1\" \"$2\" | sed '/^\s*#psk=\".*\"$/d'")
-if [[ ! $NETWORK =~ ^network ]]; then
-	echo "Invalid wifi credentials"
-	exit 1
+
+# 1. Root Check
+if [ "$EUID" -ne 0 ]; then
+    echo "This script must be run as root (sudo)."
+    exit 1
 fi
 
-# Add frequencies
-NETWORK=${NETWORK/"}"/"	scan_freq=$4
-}"}
+SSID="$1"
+PASSWORD="$2"
+COUNTRY="$3"
+HIDDEN="$5"
 
-if [ "$5" = "hidden" ]; then
-	NETWORK=${NETWORK/"}"/"	scan_ssid=1
-}"}
+if [[ -z "$SSID" || -z "$PASSWORD" ]]; then
+    echo "Usage: $0 <SSID> <Password> <Country> <Frequency> <hidden|visible>"
+    exit 1
 fi
 
-cat << __EOF > /etc/wpa_supplicant/wpa_supplicant.conf
-# Use this file to configure your wifi connection(s).
-#
-# Just uncomment the lines prefixed with a single # of the configuration
-# that matches your wifi setup and fill in SSID and passphrase.
-#
-# You can configure multiple wifi connections by adding more 'network'
-# blocks.
-#
-# See https://linux.die.net/man/5/wpa_supplicant.conf
-# (or 'man -s 5 wpa_supplicant.conf') for advanced options going beyond
-# the examples provided below (e.g. various WPA Enterprise setups).
-#
-# !!!!! HEADS-UP WINDOWS USERS !!!!!
-#
-# Do not use Wordpad for editing this file, it will mangle it and your
-# configuration won't work. Use a proper text editor instead.
-# Recommended: Notepad++, VSCode, Atom, SublimeText.
-#
-# !!!!! HEADS-UP MACOSX USERS !!!!!
-#
-# If you use Textedit to edit this file make sure to use "plain text format"
-# and "disable smart quotes" in "Textedit > Preferences", otherwise Textedit
-# will use none-compatible characters and your network configuration won't
-# work!
+# 2. Set Country Code
+if [ -n "$COUNTRY" ]; then
+    # Using iw reg set is more reliable for RatOS/NetworkManager
+    iw reg set "$COUNTRY"
+    # Make it permanent (Debian/Ubuntu way)
+    sed -i "s/REGDOMAIN=.*/REGDOMAIN=$COUNTRY/" /etc/default/crda 2>/dev/null || true
+fi
 
-## WPA/WPA2 secured
-#network={
-#  ssid="put SSID here"
-#  psk="put password here"
-#}
+# 3. Completely remove old connections with the same SSID
+# We delete all profiles using the same SSID to avoid conflicts
+mapfile -t OLD_CONNS < <(nmcli -g NAME,TYPE connection show | grep "802-11-wireless" | cut -d: -f1)
+for conn in "${OLD_CONNS[@]}"; do
+    if [[ "$conn" == "$SSID" ]]; then
+        nmcli connection delete "$conn" >/dev/null 2>&1
+    fi
+done
 
-## Open/unsecured
-#network={
-#  ssid="put SSID here"
-#  key_mgmt=NONE
-#}
+# 4. Create permanent connection
+# -- wifi.cloned-mac-address preserve helps with stable connections
+nmcli connection add \
+    type wifi \
+    ifname wlan0 \
+    con-name "$SSID" \
+    ssid "$SSID" \
+    autoconnect yes \
+    mode infrastructure \
+    -- \
+    wifi-sec.key-mgmt wpa-psk \
+    wifi-sec.psk "$PASSWORD" \
+    ipv4.method auto \
+    ipv6.method auto
 
-## WEP "secured"
-##
-## WEP can be cracked within minutes. If your network is still relying on this
-## encryption scheme you should seriously consider to update your network ASAP.
-#network={
-#  ssid="put SSID here"
-#  key_mgmt=NONE
-#  wep_key0="put password here"
-#  wep_tx_keyidx=0
-#}
+# If the network is hidden
+if [ "$HIDDEN" = "hidden" ]; then
+    nmcli connection modify "$SSID" 802-11-wireless.hidden yes
+fi
 
-# Supplied by RatOS Configurator
-$NETWORK
+# 5. Prioritize and save connection
+nmcli connection modify "$SSID" connection.autoconnect-priority 100
+nmcli connection up "$SSID"
 
-# Uncomment the country your Pi is in to activate Wifi in RaspberryPi 3 B+ and above
-# For full list see: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
-#country=GB # United Kingdom
-#country=CA # Canada
-#country=DE # Germany
-#country=FR # France
-#country=US # United States
-country=$3
-
-### You should not have to change the lines below #####################
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1
-__EOF
-
-# autohotspotN
-
-function get_sbc  {
-    grep BOARD_NAME /etc/board-release | cut -d '=' -f2
+# 6. BTT-CB1 Support (kept for backward compatibility)
+function get_sbc {
+    if [ -f /etc/board-release ]; then
+        grep BOARD_NAME /etc/board-release | cut -d '=' -f2 | tr -d '"'
+    fi
 }
 
-#CB1
-if [[ -e /etc/board-release && $(get_sbc ) = '"BTT-CB1"' ]]
-then
+if [[ $(get_sbc) == "BTT-CB1" ]]; then
   cat << __EOF > /boot/system.cfg
-#-----------------------------------------#
-check_interval=5        # Cycle to detect whether wifi is connected, time 5s
-router_ip=8.8.8.8       # Reference DNS, used to detect network connections
-
-eth=eth0        # Ethernet card device number
-wlan=wlan0      # Wireless NIC device number
-
-###########################################
-# wifi name
-#WIFI_SSID="ZYIPTest"
-# wifi password
-#WIFI_PASSWD="12345678"
-
-###########################################
-WIFI_AP="false"             # Whether to open wifi AP mode, default off
-WIFI_AP_SSID="rtl8189"      # Hotspot name created by wifi AP mode
-WIFI_AP_PASSWD="12345678"   # wifi AP mode to create hotspot connection password
-
-# Supplied by RatOS Configurator
+# Supplied by RatOS Configurator for CB1
 WIFI_SSID="$1"
 WIFI_PASSWD="$2"
+WIFI_AP="false"
 __EOF
 fi
+
+echo "WiFi configuration for $SSID has been successfully saved and applied."
