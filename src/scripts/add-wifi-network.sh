@@ -45,6 +45,7 @@ nmcli connection add \
     -- \
     wifi-sec.key-mgmt wpa-psk \
     wifi-sec.psk "$PASSWORD" \
+    wifi-sec.psk-flags 0 \
     ipv4.method auto \
     ipv6.method auto
 
@@ -58,19 +59,19 @@ nmcli connection modify "$SSID" connection.autoconnect-priority 100
 nmcli connection up "$SSID"
 
 # 6. BTT-CB1 Support (kept for backward compatibility)
-function get_sbc {
-    if [ -f /etc/board-release ]; then
-        grep BOARD_NAME /etc/board-release | cut -d '=' -f2 | tr -d '"'
-    fi
-}
+#function get_sbc {
+#    if [ -f /etc/board-release ]; then
+#        grep BOARD_NAME /etc/board-release | cut -d '=' -f2 | tr -d '"'
+#    fi
+#}
 
-if [[ $(get_sbc) == "BTT-CB1" ]]; then
-  cat << __EOF > /boot/system.cfg
+#if [[ $(get_sbc) == "BTT-CB1" ]]; then
+#  cat << __EOF > /boot/system.cfg
 # Supplied by RatOS Configurator for CB1
-WIFI_SSID="$1"
-WIFI_PASSWD="$2"
-WIFI_AP="false"
-__EOF
-fi
+#WIFI_SSID="$1"
+#WIFI_PASSWD="$2"
+#WIFI_AP="false"
+#__EOF
+#fi
 
 echo "WiFi configuration for $SSID has been successfully saved and applied."
