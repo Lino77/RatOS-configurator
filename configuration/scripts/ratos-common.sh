@@ -57,8 +57,9 @@ done
 
 [ -z "$CONFIG_PATH" ] && exit 1
 
-SBC_RAW=$(cat /proc/device-tree/model 2>/dev/null || echo "Unknown_SBC")
+SBC_RAW=$(cat /proc/device-tree/model 2>/dev/null | tr -d '\0' || echo "Unknown_SBC")
 SBC_NAME=$(echo "$SBC_RAW" | tr -dc '[:alnum:]_ ' | tr ' ' '_' | tr -d '\0')
+
 
 cat << K_EOF > "$CONFIG_PATH/sbc_hw.cfg"
 # Automatisch generiert beim Boot
