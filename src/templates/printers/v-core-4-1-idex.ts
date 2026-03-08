@@ -111,6 +111,7 @@ export const initialPrinterCfg = async (config: PrinterConfiguration, helper: Kl
 ### Everything below [include RatOS.cfg] will override default RatOS behavior
 #############################################################################################################
 [include RatOS.cfg]
+[include sbc_hw.cfg]
 
 #############################################################################################################
 ### MACRO CONFIGURATION

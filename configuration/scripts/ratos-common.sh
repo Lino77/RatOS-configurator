@@ -37,6 +37,68 @@ report_status()
     echo -e "\n\n###### $1"
 }
 
+install_sbc_detection() {
+    log_info "Installing SBC model detection for Klipper..." "install_sbc_detection"
+    report_status "Installing SBC detection service"
+    
+    local BIN_SBC="/usr/local/bin/klipper-sbc-detect.sh"
+    local SERVICE_NAME="klipper-sbc-detect.service"
+
+    # 1. Das Erkennungs-Skript erstellen
+    cat <<'EOF' > $BIN_SBC
+#!/bin/bash
+# Pfad-Erkennung für Klipper Config
+POSSIBLE_PATHS=("/home/pi/printer_data/config" "/home/$(logname)/printer_data/config" "/home/biqu/printer_data/config" "/home/ratos/printer_data/config")
+CONFIG_PATH=""
+
+for p in "${POSSIBLE_PATHS[@]}"; do
+    if [ -d "$p" ]; then CONFIG_PATH="$p"; break; fi
+done
+
+[ -z "$CONFIG_PATH" ] && exit 1
+
+SBC_RAW=$(cat /proc/device-tree/model 2>/dev/null || echo "Unknown_SBC")
+SBC_NAME=$(echo "$SBC_RAW" | tr -dc '[:alnum:]_ ' | tr ' ' '_' | tr -d '\0')
+
+cat << K_EOF > "$CONFIG_PATH/sbc_hw.cfg"
+# Automatisch generiert beim Boot
+[temperature_sensor $SBC_NAME]
+sensor_type: temperature_host
+min_temp: 10
+max_temp: 85
+K_EOF
+
+# Rechte an den Besitzer des Config-Ordners zurückgeben
+OWNER=$(stat -c '%U:%G' "$CONFIG_PATH")
+chown $OWNER "$CONFIG_PATH/sbc_hw.cfg"
+EOF
+
+    chmod +x $BIN_SBC
+
+    # 2. Systemd Service erstellen
+    cat <<EOF > /etc/systemd/system/$SERVICE_NAME
+[Unit]
+Description=Detect SBC Model for Klipper
+Before=klipper.service
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=$BIN_SBC
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # 3. Aktivieren und Erstdurchlauf
+    systemctl daemon-reload
+    systemctl enable $SERVICE_NAME
+    $BIN_SBC
+
+    log_info "SBC detection installed. File 'sbc_hw.cfg' created." "install_sbc_detection"
+}
+
 disable_modem_manager()
 {
 	report_status "Checking if ModemManager is enabled..."
