@@ -226,33 +226,35 @@ update_symlinks()
   echo "RatOS device symlinks are up to date!"
 }
 
-ensure_node_18()
+ensure_node_20()
 {
-	log_info "Ensuring Node 18 is installed" "ensure_node_18"
-	report_status "Ensuring Node 18 is installed"
+	log_info "Ensuring Node 20 is installed" "ensure_node_20"
+	report_status "Ensuring Node 20 is installed"
 
-	if node -v | grep "^v18" > /dev/null; then
-		log_info "Node 18 already installed" "ensure_node_18"
-		echo "Node 18 already installed"
+	# Prüft, ob die Version mit v20 beginnt
+	if node -v | grep "^v20" > /dev/null; then
+		log_info "Node 20 already installed" "ensure_node_20"
+		echo "Node 20 already installed"
 	else
-		log_info "Installing Node 18" "ensure_node_18"
-		echo "Installing Node 18"
+		log_info "Installing Node 20" "ensure_node_20"
+		echo "Installing Node 20"
 
-		if execute_with_logging "ensure_node_18" "NODE_REPO_UPDATE_FAILED" sed -i 's/node_16\.x/node_18\.x/g' /etc/apt/sources.list.d/nodesource.list; then
-			if execute_with_logging "ensure_node_18" "APT_UPDATE_FAILED" apt-get update; then
-				if execute_with_logging "ensure_node_18" "NODE_INSTALL_FAILED" apt-get install -y nodejs; then
-					log_info "Node 18 installed successfully" "ensure_node_18"
-					echo "Node 18 installed!"
+		# Ersetzt node_16.x oder node_18.x durch node_20.x
+		if execute_with_logging "ensure_node_20" "NODE_REPO_UPDATE_FAILED" sed -i 's/node_1[68]\.x/node_20\.x/g' /etc/apt/sources.list.d/nodesource.list; then
+			if execute_with_logging "ensure_node_20" "APT_UPDATE_FAILED" apt-get update; then
+				if execute_with_logging "ensure_node_20" "NODE_INSTALL_FAILED" apt-get install -y nodejs; then
+					log_info "Node 20 installed successfully" "ensure_node_20"
+					echo "Node 20 installed!"
 				else
-					log_error "Failed to install Node 18" "ensure_node_18" "NODE_INSTALL_FAILED"
+					log_error "Failed to install Node 20" "ensure_node_20" "NODE_INSTALL_FAILED"
 					return 1
 				fi
 			else
-				log_error "Failed to update package lists" "ensure_node_18" "APT_UPDATE_FAILED"
+				log_error "Failed to update package lists" "ensure_node_20" "APT_UPDATE_FAILED"
 				return 1
 			fi
 		else
-			log_error "Failed to update Node.js repository configuration" "ensure_node_18" "NODE_REPO_UPDATE_FAILED"
+			log_error "Failed to update Node.js repository configuration" "ensure_node_20" "NODE_REPO_UPDATE_FAILED"
 			return 1
 		fi
 	fi
