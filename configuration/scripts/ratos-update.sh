@@ -571,7 +571,7 @@ main() {
 	update_symlinks || exit_code=1
 	ensure_sudo_command_whitelisting || exit_code=1
 	ensure_service_permission || exit_code=1
-	ensure_node_18 || exit_code=1
+	ensure_node_20 || exit_code=1
 	ensure_raspi_config_cpu_governor_default || exit_code=1
 	ensure_cpufrequtils_cpu_governor_default || exit_code=1
 	ensure_cpu_governor_active || exit_code=1
