@@ -31,7 +31,7 @@ export const renderTemplate: RenderTemplateFn = (ctx) => {
 #enable_rtsp: false
 #rtsp_port: 8554
 #port: 8080
-#device: /dev/video0
+#device: /dev/RatOS/rr-vaoc-camera
 #resolution: 1920x1080
 #max_fps: 30
 

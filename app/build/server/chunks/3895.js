@@ -77,6 +77,7 @@ ${r.renderSaveVariables({xcontrolpoint:e.size.x/2-37,ycontrolpoint:e.size.y+32,z
 ### Everything below [include RatOS.cfg] will override default RatOS behavior
 #############################################################################################################
 [include RatOS.cfg]
+[include sbc_hw.cfg]
 
 #############################################################################################################
 ### MACRO CONFIGURATION

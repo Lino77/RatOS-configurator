@@ -582,6 +582,7 @@ main() {
 	verify_registered_extensions || exit_code=1
 	symlink_extensions || exit_code=1
 	update_beacon_fw || exit_code=1
+	install_sbc_detection || exit_code=1
 
 	# Re-enable exit on error for cleanup
 	set -e
