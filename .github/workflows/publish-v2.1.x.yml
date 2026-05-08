@@ -1,4 +1,3 @@
-# .github/workflows/publish.yml
 name: Publish to v2.1.x-deployment-2
 on:
   workflow_run:
@@ -7,6 +6,9 @@ on:
     types:
       - completed
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
@@ -20,6 +22,7 @@ jobs:
         run: |
           echo "CI step didn't pass, exiting"
           exit 1
+          
       - name: Set variables
         id: variables
         shell: bash
@@ -53,34 +56,19 @@ jobs:
         with:
           node-version: 22.x
 
+      # Optimiert: PNPM Setup nutzt jetzt automatisch das interne Caching
       - uses: pnpm/action-setup@v4
         name: Install pnpm
-        id: pnpm-install
         with:
           version: 9.1
           run_install: false
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "store_path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
-
-      - uses: actions/cache@v4
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.store_path }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
+      # Next.js Cache: Restore mit stabilen Keys
       - uses: actions/cache/restore@v4
         name: Restore Next.js cache
         id: cache-nextjs-restore
         with:
-          path: |
-            ${{ github.workspace }}/src/build/cache
-          # Generate a new cache whenever packages or source files change.
+          path: src/build/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('src/**/*.js', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-
@@ -97,20 +85,19 @@ jobs:
         working-directory: ./src
         run: pnpm build:cli
 
+      # Next.js Cache: Save mit explizitem Key (behebt die "Unable to reserve cache" Warnung)
       - uses: actions/cache/save@v4
         name: Save Next.js cache
-        id: cache-nextjs-save
+        if: always()
         with:
-          path: |
-            ${{ github.workspace }}/src/build/cache
-          key: ${{ steps.cache-nextjs-restore.outputs.cache-primary-key }}
+          path: src/build/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('src/**/*.js', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx') }}
 
       - name: Delete files not needed in deployment
         working-directory: ./src
         run: rm -rf __tests__ app pages components coverage data helpers hooks moonraker env recoil server utils zods test-setup.ts test-setup-global.ts vitest.config.mts tsconfig.vitest.json copy-files-from-to.json components.json postcss.config.js prettier.config.mjs tailwind.config.ts
 
       - name: Rename src/ to app/
-        working-directory: ./
         run: mv src app
 
       - name: Modify .env file to fix paths pointing to src/
@@ -128,4 +115,4 @@ jobs:
             https://github.com/Rat-OS/RatOS-configurator/compare/${{ steps.last-successful-commit.outputs.commit-sha }}...${{ github.sha }}
           git-config-name: github-actions[bot]
           git-config-email: 41898282+github-actions[bot]@users.noreply.github.com
-          branch: ${{ steps.variables.outputs.target-branch }} # The branch name where you want to push the assets
+          branch: ${{ steps.variables.outputs.target-branch }}
