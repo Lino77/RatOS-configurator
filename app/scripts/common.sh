@@ -62,9 +62,9 @@ pnpm_install() {
 			report_status "Deleting root owned node_modules"
 			rm -rf "$SRC_DIR/node_modules"
 		fi
-        sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
+        sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false --config.only-built-dependencies=esbuild
     else
-		pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
+		pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false --config.only-built-dependencies=esbuild
 	fi
     popd || exit 1
 }
