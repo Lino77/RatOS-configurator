@@ -27,7 +27,7 @@ jobs:
           echo "target-branch=v2.1.x-deployment-2" >> "$GITHUB_OUTPUT"
           echo "src-branch=v2.1.x" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ steps.variables.outputs.src-branch }}
     
@@ -49,9 +49,9 @@ jobs:
           echo "Deploying $(git rev-list --count ${{ steps.last-successful-commit.outputs.commit-sha }}..${{ github.sha }}) commits!"
           echo "commit-count=$(git rev-list --count ${{ steps.last-successful-commit.outputs.commit-sha }}..${{ github.sha }})" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 22.x
 
       - uses: pnpm/action-setup@v4
         name: Install pnpm
@@ -66,7 +66,7 @@ jobs:
         run: |
           echo "store_path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         name: Setup pnpm cache
         with:
           path: ${{ steps.pnpm-cache.outputs.store_path }}
@@ -87,7 +87,7 @@ jobs:
 
       - name: Install all dependencies
         working-directory: ./src
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build
         working-directory: ./src
