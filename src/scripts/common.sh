@@ -58,37 +58,44 @@ pnpm_install() {
 		mv "$BASE_DIR/node_modules" "$SRC_DIR"
 	fi
 
-	# Root-Altlasten bereinigen
+	# Root-Altlasten bereinigen (Fix für alte 2.0 Installationen)
 	if [ -d "$SRC_DIR/node_modules" ] && [ "$(stat -c %U "$SRC_DIR/node_modules")" == "root" ]; then
 		report_status "Deleting root owned node_modules"
 		rm -rf "$SRC_DIR/node_modules"
 	fi
 
-	# .npmrc erstellen, um pnpm Sicherheitsabfragen für esbuild zu umgehen
-	report_status "Configuring pnpm build permissions..."
-	echo "only-built-dependencies[]=esbuild" > .npmrc
+	# PNPM Konfiguration: Erlaubnis für esbuild global setzen, um Sicherheitsabfragen zu killen
+	report_status "Enabling build scripts for esbuild..."
 	
-	# Rechte der .npmrc anpassen, falls als root ausgeführt
 	if [ "$EUID" -eq 0 ]; then
-		chown "${RATOS_USERNAME}:${RATOS_USERNAME}" .npmrc
-		sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
+		# Für den RatOS User global konfigurieren
+		sudo -u "${RATOS_USERNAME}" pnpm config set only-built-dependencies -g esbuild
+		# Installation ausführen mit explizitem Script-Enabling
+		sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false --ignore-scripts=false
 	else
-		pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
+		pnpm config set only-built-dependencies -g esbuild
+		pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false --ignore-scripts=false
 	fi
 	
 	popd || exit 1
 }
 
 ensure_pnpm_installation() {
+	# Sicherstellen, dass pnpm vorhanden ist
 	if ! which pnpm &> /dev/null; then
 		report_status "Installing pnpm"
 		npm install -g pnpm
-		# Bei Neuinstallation auch das Lockfile löschen, um Mismatch-Fehler zu vermeiden
-		rm -rf "$SRC_DIR/node_modules"
-		rm -f "$SRC_DIR/pnpm-lock.yaml"
-		pnpm_install
 	fi
+
+	# Radikaler Clean-Start: Node_modules und Lockfile löschen, 
+	# um Versions-Konflikte (v6 vs v9) und Lockfile-Mismatches zu vermeiden
+	report_status "Cleaning up old installation artifacts..."
+	rm -rf "$SRC_DIR/node_modules"
+	rm -f "$SRC_DIR/pnpm-lock.yaml"
+	
+	pnpm_install
 }
+
 
 
 ensure_service_permission()
