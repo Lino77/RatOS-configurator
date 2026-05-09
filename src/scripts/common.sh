@@ -63,10 +63,10 @@ pnpm_install() {
 			rm -rf "$SRC_DIR/node_modules"
 		fi
 		sudo -u "${RATOS_USERNAME}" pnpm config set --location=project allowScripts true
-        sudo -u "${RATOS_USERNAME}" pnpm install --aggregate-output --no-color --config.confirmModulesPurge=false
+        sudo -u "${RATOS_USERNAME}" pnpm install --no-ignore-scripts --aggregate-output --no-color --config.confirmModulesPurge=false
     else
 	    pnpm config set --location=project allowScripts true
-		pnpm install --aggregate-output --no-color --config.confirmModulesPurge=false
+		pnpm install --no-ignore-scripts --aggregate-output --no-color --config.confirmModulesPurge=false
 	fi
     popd || exit 1
 }
