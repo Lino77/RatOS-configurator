@@ -62,7 +62,7 @@ pnpm_install() {
 			report_status "Deleting root owned node_modules"
 			rm -rf "$SRC_DIR/node_modules"
 		fi
-		pnpm config set --location=project allow-scripts=true
+		sudo -u "${RATOS_USERNAME}" pnpm config set --location=project allow-scripts=true
         sudo -u "${RATOS_USERNAME}" pnpm install --aggregate-output --no-color --config.confirmModulesPurge=false
     else
 	    pnpm config set --location=project allow-scripts=true
