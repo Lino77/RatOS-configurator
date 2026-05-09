@@ -226,35 +226,33 @@ update_symlinks()
   echo "RatOS device symlinks are up to date!"
 }
 
-ensure_node_20()
+ensure_node_18()
 {
-	log_info "Ensuring Node 20 is installed" "ensure_node_20"
-	report_status "Ensuring Node 20 is installed"
+	log_info "Ensuring Node 22 is installed" "ensure_node_18"
+	report_status "Ensuring Node 18 is installed"
 
-	# Prüft, ob die Version mit v20 beginnt
-	if node -v | grep "^v20" > /dev/null; then
-		log_info "Node 20 already installed" "ensure_node_20"
-		echo "Node 20 already installed"
+	if node -v | grep "^v22" > /dev/null; then
+		log_info "Node 22 already installed" "ensure_node_18"
+		echo "Node 22 already installed"
 	else
-		log_info "Installing Node 20" "ensure_node_20"
-		echo "Installing Node 20"
+		log_info "Installing Node 22" "ensure_node_22"
+		echo "Installing Node 22"
 
-		# Ersetzt node_16.x oder node_18.x durch node_20.x
-		if execute_with_logging "ensure_node_20" "NODE_REPO_UPDATE_FAILED" sed -i 's/node_1[68]\.x/node_20\.x/g' /etc/apt/sources.list.d/nodesource.list; then
-			if execute_with_logging "ensure_node_20" "APT_UPDATE_FAILED" apt-get update; then
-				if execute_with_logging "ensure_node_20" "NODE_INSTALL_FAILED" apt-get install -y nodejs; then
-					log_info "Node 20 installed successfully" "ensure_node_20"
-					echo "Node 20 installed!"
+		if execute_with_logging "ensure_node_22" "NODE_REPO_UPDATE_FAILED" sed -i 's/node_20\.x/node_18\.x/g' /etc/apt/sources.list.d/nodesource.list; then
+			if execute_with_logging "ensure_node_22" "APT_UPDATE_FAILED" apt-get update; then
+				if execute_with_logging "ensure_node_22" "NODE_INSTALL_FAILED" apt-get install -y nodejs; then
+					log_info "Node 22 installed successfully" "ensure_node_18"
+					echo "Node 18 installed!"
 				else
-					log_error "Failed to install Node 20" "ensure_node_20" "NODE_INSTALL_FAILED"
+					log_error "Failed to install Node 22" "ensure_node_18" "NODE_INSTALL_FAILED"
 					return 1
 				fi
 			else
-				log_error "Failed to update package lists" "ensure_node_20" "APT_UPDATE_FAILED"
+				log_error "Failed to update package lists" "ensure_node_22" "APT_UPDATE_FAILED"
 				return 1
 			fi
 		else
-			log_error "Failed to update Node.js repository configuration" "ensure_node_20" "NODE_REPO_UPDATE_FAILED"
+			log_error "Failed to update Node.js repository configuration" "ensure_node_22" "NODE_REPO_UPDATE_FAILED"
 			return 1
 		fi
 	fi
@@ -571,7 +569,7 @@ main() {
 	update_symlinks || exit_code=1
 	ensure_sudo_command_whitelisting || exit_code=1
 	ensure_service_permission || exit_code=1
-	ensure_node_20 || exit_code=1
+	ensure_node_22 || exit_code=1
 	ensure_raspi_config_cpu_governor_default || exit_code=1
 	ensure_cpufrequtils_cpu_governor_default || exit_code=1
 	ensure_cpu_governor_active || exit_code=1

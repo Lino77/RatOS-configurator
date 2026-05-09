@@ -50,53 +50,34 @@ install_or_update_service_file()
 
 pnpm_install() {
 	report_status "Installing pnpm dependencies..."
-	pushd "$SRC_DIR" || exit 1
-
-	# Vorhandene node_modules verschieben falls nötig
+    pushd "$SRC_DIR" || exit 1
 	if [ -d "$BASE_DIR/node_modules" ]; then
 		report_status "Moving node_modules from git directory to src directory"
 		mv "$BASE_DIR/node_modules" "$SRC_DIR"
 	fi
-
-	# Root-Altlasten bereinigen (Fix für alte 2.0 Installationen)
-	if [ -d "$SRC_DIR/node_modules" ] && [ "$(stat -c %U "$SRC_DIR/node_modules")" == "root" ]; then
-		report_status "Deleting root owned node_modules"
-		rm -rf "$SRC_DIR/node_modules"
-	fi
-
-	# PNPM Konfiguration: Erlaubnis für esbuild global setzen, um Sicherheitsabfragen zu killen
-	report_status "Enabling build scripts for esbuild..."
-	
 	if [ "$EUID" -eq 0 ]; then
-		# Für den RatOS User global konfigurieren
-		sudo -u "${RATOS_USERNAME}" pnpm config set only-built-dependencies -g esbuild
-		# Installation ausführen mit explizitem Script-Enabling
-		sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false --ignore-scripts=false
-	else
-		pnpm config set only-built-dependencies -g esbuild
-		pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false --ignore-scripts=false
+		# Check if node_modules is owned by root and delete
+		# Fixes old 2.0 installations
+		if [ -d "$SRC_DIR/node_modules" ] && [ "$(stat -c %U "$SRC_DIR/node_modules")" == "root" ]; then
+			report_status "Deleting root owned node_modules"
+			rm -rf "$SRC_DIR/node_modules"
+		fi
+        sudo -u "${RATOS_USERNAME}" pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
+    else
+		pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
 	fi
-	
-	popd || exit 1
+    popd || exit 1
 }
 
 ensure_pnpm_installation() {
-	# Sicherstellen, dass pnpm vorhanden ist
 	if ! which pnpm &> /dev/null; then
 		report_status "Installing pnpm"
 		npm install -g pnpm
+		# remove old node modules
+		rm -rf "$SRC_DIR/node_modules"
+		pnpm_install
 	fi
-
-	# Radikaler Clean-Start: Node_modules und Lockfile löschen, 
-	# um Versions-Konflikte (v6 vs v9) und Lockfile-Mismatches zu vermeiden
-	report_status "Cleaning up old installation artifacts..."
-	rm -rf "$SRC_DIR/node_modules"
-	rm -f "$SRC_DIR/pnpm-lock.yaml"
-	
-	pnpm_install
 }
-
-
 
 ensure_service_permission()
 {
