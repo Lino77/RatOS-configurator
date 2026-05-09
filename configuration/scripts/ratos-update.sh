@@ -226,7 +226,7 @@ update_symlinks()
   echo "RatOS device symlinks are up to date!"
 }
 
-ensure_node_18()
+ensure_node_22()
 {
 	log_info "Ensuring Node 22 is installed" "ensure_node_18"
 	report_status "Ensuring Node 18 is installed"
