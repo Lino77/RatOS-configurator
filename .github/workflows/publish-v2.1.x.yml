@@ -57,7 +57,7 @@ jobs:
         name: Install pnpm
         id: pnpm-install
         with:
-          version: 9.1
+          version: 10.31.0
           run_install: false
 
       - name: Get pnpm store directory
@@ -87,7 +87,7 @@ jobs:
 
       - name: Install all dependencies
         working-directory: ./src
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile --aggregate-output
 
       - name: Build
         working-directory: ./src
