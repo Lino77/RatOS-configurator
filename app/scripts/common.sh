@@ -67,17 +67,17 @@ ppnpm_install() {
 		fi
 		
 		# 1. Versuch: Frozen (Standard)
-		if ! sudo -u "${RATOS_USERNAME}" pnpm install --frozen-lockfile $OPTS; then
+		if ! sudo -u "${RATOS_USERNAME}" pnpm install --frozen-lockfile "$OPTS"; then
 			report_status "Frozen install failed, retrying with lockfile update and build approval..."
 			# Reparatur: Lockfile-Update UND Build-Erlaubnis für esbuild (Fix für Trixie)
-			sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile $OPTS --only-built-dependencies esbuild
+			sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile "$OPTS" --only-built-dependencies esbuild
 		fi
 	else
 		# 1. Versuch: Frozen
-		if ! pnpm install --frozen-lockfile $OPTS; then
+		if ! pnpm install --frozen-lockfile "$OPTS"; then
 			report_status "Frozen install failed, retrying with lockfile update and build approval..."
 			# Reparatur
-			pnpm install --no-frozen-lockfile $OPTS --only-built-dependencies esbuild
+			pnpm install --no-frozen-lockfile "$OPTS" --only-built-dependencies esbuild
 		fi
 	fi
 	popd || exit 1
