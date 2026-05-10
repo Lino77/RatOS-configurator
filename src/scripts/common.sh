@@ -61,26 +61,31 @@ pnpm_install() {
 			report_status "Deleting root owned node_modules"
 			rm -rf "$SRC_DIR/node_modules"
 		fi
+		# Erster Versuch (Frozen)
 		if ! sudo -u "${RATOS_USERNAME}" pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false; then
-			report_status "Frozen install failed, retrying with lockfile update..."
+			report_status "Frozen install failed, retrying with lockfile update and build approval..."
+			# Reparatur-Versuch: Erlaubt Build-Scripte (Fix für Trixie/pnpm9) und ignoriert Lockfile-Mismatch
 			sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
 		fi
 	else
+		# Erster Versuch (Frozen)
 		if ! pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false; then
-			report_status "Frozen install failed, retrying with lockfile update..."
+			report_status "Frozen install failed, retrying with lockfile update and build approval..."
+			# Reparatur-Versuch
 			pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
 		fi
 	fi
 	popd || exit 1
 }
 
-
 ensure_pnpm_installation() {
 	if ! which pnpm &> /dev/null; then
 		report_status "Installing pnpm"
 		npm install -g pnpm
-		# remove old node modules
+		# Bei Neuinstallation von pnpm auch das alte Lockfile löschen, 
+		# um Inkompatibilitäten unter Trixie zu vermeiden
 		rm -rf "$SRC_DIR/node_modules"
+		rm -f "$SRC_DIR/pnpm-lock.yaml"
 		pnpm_install
 	fi
 }
