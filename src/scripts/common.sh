@@ -50,24 +50,30 @@ install_or_update_service_file()
 
 pnpm_install() {
 	report_status "Installing pnpm dependencies..."
-    pushd "$SRC_DIR" || exit 1
+	pushd "$SRC_DIR" || exit 1
 	if [ -d "$BASE_DIR/node_modules" ]; then
 		report_status "Moving node_modules from git directory to src directory"
 		mv "$BASE_DIR/node_modules" "$SRC_DIR"
 	fi
 	if [ "$EUID" -eq 0 ]; then
 		# Check if node_modules is owned by root and delete
-		# Fixes old 2.0 installations
 		if [ -d "$SRC_DIR/node_modules" ] && [ "$(stat -c %U "$SRC_DIR/node_modules")" == "root" ]; then
 			report_status "Deleting root owned node_modules"
 			rm -rf "$SRC_DIR/node_modules"
 		fi
-        sudo -u "${RATOS_USERNAME}" pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
-    else
-		pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
+		if ! sudo -u "${RATOS_USERNAME}" pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false; then
+			report_status "Frozen install failed, retrying with lockfile update..."
+			sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
+		fi
+	else
+		if ! pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false; then
+			report_status "Frozen install failed, retrying with lockfile update..."
+			pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
+		fi
 	fi
-    popd || exit 1
+	popd || exit 1
 }
+
 
 ensure_pnpm_installation() {
 	if ! which pnpm &> /dev/null; then
