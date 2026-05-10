@@ -56,31 +56,27 @@ pnpm_install() {
 		mv "$BASE_DIR/node_modules" "$SRC_DIR"
 	fi
 	if [ "$EUID" -eq 0 ]; then
-		# Check if node_modules is owned by root and delete
 		if [ -d "$SRC_DIR/node_modules" ] && [ "$(stat -c %U "$SRC_DIR/node_modules")" == "root" ]; then
 			report_status "Deleting root owned node_modules"
 			rm -rf "$SRC_DIR/node_modules"
 		fi
-		# Erster Versuch (Frozen)
+		# Erster Versuch
 		if ! sudo -u "${RATOS_USERNAME}" pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false; then
 			report_status "Frozen install failed, retrying with lockfile update and build approval..."
-			# Fix für Trixie/pnpm9: Erlaubt Build-Scripte für esbuild
-			sudo -u "${RATOS_USERNAME}" pnpm approve-builds --add esbuild
-			# Reparatur-Versuch
-			sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
+			# Wir erlauben esbuild direkt über die Config-Flag im install Befehl
+			sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false --only-built-dependencies esbuild
 		fi
 	else
-		# Erster Versuch (Frozen)
+		# Erster Versuch
 		if ! pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false; then
 			report_status "Frozen install failed, retrying with lockfile update and build approval..."
-			# Fix für Trixie/pnpm9: Erlaubt Build-Scripte für esbuild
-			pnpm approve-builds --add esbuild
-			# Reparatur-Versuch
-			pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
+			# Wir erlauben esbuild direkt über die Config-Flag im install Befehl
+			pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false --only-built-dependencies esbuild
 		fi
 	fi
 	popd || exit 1
 }
+
 
 ensure_pnpm_installation() {
 	if ! which pnpm &> /dev/null; then
