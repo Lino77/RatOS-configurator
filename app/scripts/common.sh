@@ -64,13 +64,17 @@ pnpm_install() {
 		# Erster Versuch (Frozen)
 		if ! sudo -u "${RATOS_USERNAME}" pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false; then
 			report_status "Frozen install failed, retrying with lockfile update and build approval..."
-			# Reparatur-Versuch: Erlaubt Build-Scripte (Fix für Trixie/pnpm9) und ignoriert Lockfile-Mismatch
+			# Fix für Trixie/pnpm9: Erlaubt Build-Scripte für esbuild
+			sudo -u "${RATOS_USERNAME}" pnpm approve-builds --add esbuild
+			# Reparatur-Versuch
 			sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
 		fi
 	else
 		# Erster Versuch (Frozen)
 		if ! pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false; then
 			report_status "Frozen install failed, retrying with lockfile update and build approval..."
+			# Fix für Trixie/pnpm9: Erlaubt Build-Scripte für esbuild
+			pnpm approve-builds --add esbuild
 			# Reparatur-Versuch
 			pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false
 		fi
