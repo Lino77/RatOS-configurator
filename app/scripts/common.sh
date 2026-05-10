@@ -48,7 +48,7 @@ install_or_update_service_file()
 	fi
 }
 
-ppnpm_install() {
+pnpm_install() {
 	report_status "Installing pnpm dependencies..."
 	pushd "$SRC_DIR" || exit 1
 	
