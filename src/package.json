@@ -23,9 +23,12 @@
 		"bench:bignumber": "cd ./benchmarks && tsx ./bignumber.ts"
 	},
 	"pnpm": {
-		"overrides": {
-			"react-remove-scroll": "2.5.9"
-		}
+	"overrides": {
+		"react-remove-scroll": "2.5.9"
+	},
+	"allowedBuilds": [
+		"esbuild"
+	]
 	},
 	"dependencies": {
 		"@formkit/auto-animate": "^0.8.0",
