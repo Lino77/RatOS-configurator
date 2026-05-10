@@ -47,7 +47,6 @@ install_sbc_detection() {
     # 1. Das Erkennungs-Skript erstellen
     cat <<'EOF' > "$BIN_SBC"
 #!/bin/bash
-# Pfad-Erkennung für Klipper Config
 POSSIBLE_PATHS=("/home/pi/printer_data/config" "/home/$(logname 2>/dev/null || echo 'pi')/printer_data/config" "/home/biqu/printer_data/config" "/home/ratos/printer_data/config")
 CONFIG_PATH=""
 
