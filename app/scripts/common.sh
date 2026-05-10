@@ -48,34 +48,41 @@ install_or_update_service_file()
 	fi
 }
 
-pnpm_install() {
+ppnpm_install() {
 	report_status "Installing pnpm dependencies..."
 	pushd "$SRC_DIR" || exit 1
+	
 	if [ -d "$BASE_DIR/node_modules" ]; then
 		report_status "Moving node_modules from git directory to src directory"
 		mv "$BASE_DIR/node_modules" "$SRC_DIR"
 	fi
+
+	# Gemeinsame Optionen für alle Versuche
+	local OPTS="--aggregate-output --no-color --config.confirmModulesPurge=false"
+
 	if [ "$EUID" -eq 0 ]; then
 		if [ -d "$SRC_DIR/node_modules" ] && [ "$(stat -c %U "$SRC_DIR/node_modules")" == "root" ]; then
 			report_status "Deleting root owned node_modules"
 			rm -rf "$SRC_DIR/node_modules"
 		fi
-		# Erster Versuch
-		if ! sudo -u "${RATOS_USERNAME}" pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false; then
+		
+		# 1. Versuch: Frozen (Standard)
+		if ! sudo -u "${RATOS_USERNAME}" pnpm install --frozen-lockfile $OPTS; then
 			report_status "Frozen install failed, retrying with lockfile update and build approval..."
-			# Wir erlauben esbuild direkt über die Config-Flag im install Befehl
-			sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false --only-built-dependencies esbuild
+			# Reparatur: Lockfile-Update UND Build-Erlaubnis für esbuild (Fix für Trixie)
+			sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile $OPTS --only-built-dependencies esbuild
 		fi
 	else
-		# Erster Versuch
-		if ! pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false; then
+		# 1. Versuch: Frozen
+		if ! pnpm install --frozen-lockfile $OPTS; then
 			report_status "Frozen install failed, retrying with lockfile update and build approval..."
-			# Wir erlauben esbuild direkt über die Config-Flag im install Befehl
-			pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false --only-built-dependencies esbuild
+			# Reparatur
+			pnpm install --no-frozen-lockfile $OPTS --only-built-dependencies esbuild
 		fi
 	fi
 	popd || exit 1
 }
+
 
 
 ensure_pnpm_installation() {
