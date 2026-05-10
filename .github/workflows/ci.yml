@@ -82,7 +82,7 @@ jobs:
 
       - name: Dependencies
         working-directory: ratos-configurator/src
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Checkout Klipper
         uses: actions/checkout@v4
