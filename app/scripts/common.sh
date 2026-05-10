@@ -57,27 +57,24 @@ pnpm_install() {
 		mv "$BASE_DIR/node_modules" "$SRC_DIR"
 	fi
 
-	# Gemeinsame Optionen für alle Versuche
-	local OPTS="--aggregate-output --no-color --config.confirmModulesPurge=false"
-
 	if [ "$EUID" -eq 0 ]; then
 		if [ -d "$SRC_DIR/node_modules" ] && [ "$(stat -c %U "$SRC_DIR/node_modules")" == "root" ]; then
 			report_status "Deleting root owned node_modules"
 			rm -rf "$SRC_DIR/node_modules"
 		fi
 		
-		# 1. Versuch: Frozen (Standard)
-		if ! sudo -u "${RATOS_USERNAME}" pnpm install --frozen-lockfile "$OPTS"; then
-			report_status "Frozen install failed, retrying with lockfile update and build approval..."
-			# Reparatur: Lockfile-Update UND Build-Erlaubnis für esbuild (Fix für Trixie)
-			sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile "$OPTS" --only-built-dependencies esbuild
+		# 1. Versuch: Frozen
+		if ! sudo -u "${RATOS_USERNAME}" pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false; then
+			report_status "Frozen install failed, retrying with lockfile update..."
+			# 2. Versuch: Reparatur (Wichtig: Flags direkt im Befehl!)
+			sudo -u "${RATOS_USERNAME}" pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false --only-built-dependencies esbuild
 		fi
 	else
 		# 1. Versuch: Frozen
-		if ! pnpm install --frozen-lockfile "$OPTS"; then
-			report_status "Frozen install failed, retrying with lockfile update and build approval..."
-			# Reparatur
-			pnpm install --no-frozen-lockfile "$OPTS" --only-built-dependencies esbuild
+		if ! pnpm install --frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false; then
+			report_status "Frozen install failed, retrying with lockfile update..."
+			# 2. Versuch: Reparatur
+			pnpm install --no-frozen-lockfile --aggregate-output --no-color --config.confirmModulesPurge=false --only-built-dependencies esbuild
 		fi
 	fi
 	popd || exit 1
