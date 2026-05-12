@@ -38,7 +38,6 @@ report_status()
 }
 
 install_sbc_detection() {
-    log_info "Installing SBC model detection for Klipper..." "install_sbc_detection"
     report_status "Installing SBC detection service"
     
     local BIN_SBC="/usr/local/bin/klipper-sbc-detect.sh"
@@ -97,7 +96,7 @@ EOF
     systemctl enable "$SERVICE_NAME"
     "$BIN_SBC"
 
-    log_info "SBC detection installed. File 'sbc_hw.cfg' created." "install_sbc_detection"
+    report_status "SBC detection installed. File 'sbc_hw.cfg' created." "install_sbc_detection"
 }
 
 disable_modem_manager()
