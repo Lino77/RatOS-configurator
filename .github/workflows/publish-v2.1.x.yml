@@ -85,7 +85,10 @@ jobs:
 
       - name: Install all dependencies
         working-directory: ./src
-        run: pnpm install --frozen-lockfile --aggregate-output 
+        run: |
+          # Erlaubt esbuild explizit (behebt ERR_PNPM_IGNORED_BUILDS)
+          pnpm config set only-built-dependencies esbuild
+          pnpm install --frozen-lockfile --aggregate-output 
 
       - name: Build
         working-directory: ./src

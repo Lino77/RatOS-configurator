@@ -84,7 +84,11 @@ jobs:
 
       - name: Dependencies
         working-directory: ratos-configurator/src
-        run: pnpm install --frozen-lockfile 
+        run: |
+          # Erlaubt esbuild explizit das Ausführen von Build-Skripten (erforderlich für pnpm v9+)
+          pnpm config set only-built-dependencies esbuild
+          # Jetzt schlägt die Installation nicht mehr wegen blockierter Skripte fehl
+          pnpm install --frozen-lockfile
 
       - name: Checkout Klipper
         uses: actions/checkout@v6
