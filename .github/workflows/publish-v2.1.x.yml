@@ -65,7 +65,7 @@ jobs:
         shell: bash
         run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-      - uses: actions/cache@v6
+      - uses: actions/cache@v5
         name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
@@ -75,7 +75,7 @@ jobs:
 
       - name: Restore Next.js cache
         id: cache-nextjs-restore
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@v5
         with:
           path: src/build/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('src/pnpm-lock.yaml') }}-${{ hashFiles('src/**/*.js', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx') }}
@@ -94,7 +94,7 @@ jobs:
           pnpm build:cli
 
       - name: Save Next.js cache
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@v5
         if: steps.cache-nextjs-restore.outputs.cache-hit != 'true'
         with:
           path: src/build/cache
