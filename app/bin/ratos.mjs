@@ -86165,7 +86165,7 @@ var experimental_formDataLink = httpLinkFactory({
 // ../utils/trpc.ts
 init_cjs_shim();
 
-// ../node_modules/.pnpm/@trpc+next@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@18_ce87483d3f4d8d3442f4013df127b8fe/node_modules/@trpc/next/dist/index.mjs
+// ../node_modules/.pnpm/@trpc+next@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@18.2.0___2igx4b6qzwu3mpzu3wdw7fruxy/node_modules/@trpc/next/dist/index.mjs
 init_cjs_shim();
 
 // ../node_modules/.pnpm/@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@18.2.0/node_modules/@tanstack/react-query/build/lib/index.mjs
@@ -89176,13 +89176,13 @@ function useInfiniteQuery(arg1, arg2, arg3) {
   return useBaseQuery(options, InfiniteQueryObserver);
 }
 
-// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__r_932a42d5dd06d09d399c6d7dac058e79/node_modules/@trpc/react-query/dist/index.mjs
+// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@1_imzujfin52fnt6zpsqmunjdtru/node_modules/@trpc/react-query/dist/index.mjs
 init_cjs_shim();
 
-// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__r_932a42d5dd06d09d399c6d7dac058e79/node_modules/@trpc/react-query/dist/createHooksInternal-063195fc.mjs
+// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@1_imzujfin52fnt6zpsqmunjdtru/node_modules/@trpc/react-query/dist/createHooksInternal-063195fc.mjs
 init_cjs_shim();
 
-// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__r_932a42d5dd06d09d399c6d7dac058e79/node_modules/@trpc/react-query/dist/getArrayQueryKey-86134f8b.mjs
+// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@1_imzujfin52fnt6zpsqmunjdtru/node_modules/@trpc/react-query/dist/getArrayQueryKey-86134f8b.mjs
 init_cjs_shim();
 function getArrayQueryKey(queryKey, type) {
   const queryKeyArrayed = Array.isArray(queryKey) ? queryKey : [
@@ -89207,7 +89207,7 @@ function getArrayQueryKey(queryKey, type) {
   ];
 }
 
-// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__r_932a42d5dd06d09d399c6d7dac058e79/node_modules/@trpc/react-query/dist/createHooksInternal-063195fc.mjs
+// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@1_imzujfin52fnt6zpsqmunjdtru/node_modules/@trpc/react-query/dist/createHooksInternal-063195fc.mjs
 var import_react = __toESM(require_react(), 1);
 function getQueryKeyInternal(path13, input) {
   if (path13.length)
@@ -89718,7 +89718,7 @@ function createHooksInternal(config) {
   return createRootHooks(config);
 }
 
-// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__r_932a42d5dd06d09d399c6d7dac058e79/node_modules/@trpc/react-query/dist/index.mjs
+// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@1_imzujfin52fnt6zpsqmunjdtru/node_modules/@trpc/react-query/dist/index.mjs
 var import_react2 = __toESM(require_react(), 1);
 function createHooksInternalProxy(trpc2) {
   return createFlatProxy((key) => {
@@ -89747,17 +89747,17 @@ function createReactQueryHooks(opts) {
   };
 }
 
-// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__r_932a42d5dd06d09d399c6d7dac058e79/node_modules/@trpc/react-query/dist/shared/index.mjs
+// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@1_imzujfin52fnt6zpsqmunjdtru/node_modules/@trpc/react-query/dist/shared/index.mjs
 init_cjs_shim();
 
-// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__r_932a42d5dd06d09d399c6d7dac058e79/node_modules/@trpc/react-query/dist/queryClient-4d766c0c.mjs
+// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@1_imzujfin52fnt6zpsqmunjdtru/node_modules/@trpc/react-query/dist/queryClient-4d766c0c.mjs
 init_cjs_shim();
 var getQueryClient = (config) => config.queryClient ?? new QueryClient(config.queryClientConfig);
 
-// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__r_932a42d5dd06d09d399c6d7dac058e79/node_modules/@trpc/react-query/dist/shared/index.mjs
+// ../node_modules/.pnpm/@trpc+react-query@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@1_imzujfin52fnt6zpsqmunjdtru/node_modules/@trpc/react-query/dist/shared/index.mjs
 var import_react3 = __toESM(require_react(), 1);
 
-// ../node_modules/.pnpm/@trpc+next@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@18_ce87483d3f4d8d3442f4013df127b8fe/node_modules/@trpc/next/dist/index.mjs
+// ../node_modules/.pnpm/@trpc+next@10.45.1_@tanstack+react-query@4.36.1_react-dom@18.2.0_react@18.2.0__react@18.2.0___2igx4b6qzwu3mpzu3wdw7fruxy/node_modules/@trpc/next/dist/index.mjs
 var import_react4 = __toESM(require_react(), 1);
 function transformQueryOrMutationCacheErrors(result) {
   const error = result.state.error;
