@@ -14,23 +14,30 @@ permissions:
   actions: read
   checks: write
 
+# Erzwingt die Node.js 24 Laufzeit
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   report:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v6 # Aktualisiert von v3 auf v6
         with:
           run_id: ${{ github.event.workflow_run.id }}
           name: test-results
           if_no_artifact_found: fail
 
-      - uses: ataylorme/eslint-annotate-action@v2
+      - name: Annotate ESLint
+        uses: ataylorme/eslint-annotate-action@v3 # Aktualisiert von v2 auf v3
 
-      - uses: dorny/test-reporter@v1
+      - name: Test Report
+        uses: dorny/test-reporter@v1
         with:
-          artifact: test-results # artifact name
-          name: Test Report # Name of the check run which will be created
-          path: "*.xml" # Path to test results (inside artifact .zip)
-          reporter: jest-junit # Format of test results
+          artifact: test-results
+          name: Test Report
+          path: "*.xml"
+          reporter: jest-junit
+

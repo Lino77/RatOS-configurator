@@ -23,13 +23,17 @@ on:
 
   workflow_dispatch:
 
+# Erzwingt Node.js 24 für alle Actions
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   ensure_executable_scripts:
     name: Ensure executable scripts
     runs-on: ubuntu-latest
     steps:
       - name: Fetch Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Aktualisiert von v3 auf v4
       - run: ./configuration/scripts/ensure-executable-scripts.sh
 
   lint_configuration_scripts:
@@ -37,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fetch Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Aktualisiert von v3 auf v4
 
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
@@ -65,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fetch Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Aktualisiert von v3 auf v4
 
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
@@ -93,7 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fetch Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Aktualisiert von v3 auf v4
 
       - name: Run ShellCheck
         id: boards
