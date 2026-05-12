@@ -84,7 +84,10 @@ jobs:
 
       - name: Dependencies
         working-directory: ratos-configurator/src
-        run: pnpm install --frozen-lockfile
+        run: |
+          # Erzwingt die Erlaubnis für Build-Skripte via Umgebungsvariable oder Config
+          pnpm config set only-built-dependencies esbuild
+          pnpm install --frozen-lockfile
 
       - name: Checkout Klipper
         uses: actions/checkout@v6
