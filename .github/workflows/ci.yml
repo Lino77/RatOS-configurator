@@ -84,7 +84,7 @@ jobs:
 
       - name: Dependencies
         working-directory: ratos-configurator/src
-        run: pnpm install --frozen-lockfile --only-built-dependencies esbuild
+        run: pnpm install --frozen-lockfile --config.only-built-dependencies=esbuilds
 
       - name: Checkout Klipper
         uses: actions/checkout@v6

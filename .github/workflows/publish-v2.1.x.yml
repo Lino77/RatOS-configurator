@@ -85,7 +85,7 @@ jobs:
 
       - name: Install all dependencies
         working-directory: ./src
-        run: pnpm install --frozen-lockfile --aggregate-output --only-built-dependencies esbuild
+        run: pnpm install --frozen-lockfile --aggregate-output --config.only-built-dependencies=esbuild
 
       - name: Build
         working-directory: ./src
