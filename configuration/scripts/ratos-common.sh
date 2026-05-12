@@ -43,10 +43,9 @@ install_sbc_detection() {
     local BIN_SBC="/usr/local/bin/klipper-sbc-detect.sh"
     local SERVICE_NAME="klipper-sbc-detect.service"
 
-    # 1. Das Erkennungs-Skript erstellen
-    cat <<'EOF' > "$BIN_SBC"
+    # 1. Das Erkennungs-Skript mit sudo erstellen
+    cat <<'EOF' | $SUDO tee "$BIN_SBC" > /dev/null
 #!/bin/bash
-# Pfad-Erkennung für Klipper Config
 POSSIBLE_PATHS=("/home/pi/printer_data/config" "/home/$(logname 2>/dev/null || echo 'pi')/printer_data/config" "/home/biqu/printer_data/config" "/home/ratos/printer_data/config")
 CONFIG_PATH=""
 
@@ -73,10 +72,10 @@ OWNER=$(stat -c '%U:%G' "$CONFIG_PATH")
 chown "$OWNER" "$CONFIG_PATH/sbc_hw.cfg"
 EOF
 
-    chmod +x "$BIN_SBC"
+    $SUDO chmod +x "$BIN_SBC"
 
-    # 2. Systemd Service erstellen
-    cat <<EOF > "/etc/systemd/system/${SERVICE_NAME}"
+    # 2. Systemd Service mit sudo erstellen
+    cat <<EOF | $SUDO tee "/etc/systemd/system/${SERVICE_NAME}" > /dev/null
 [Unit]
 Description=Detect SBC Model for Klipper
 Before=klipper.service
@@ -91,11 +90,10 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 EOF
 
-    # 3. Aktivieren und Erstdurchlauf
-    systemctl daemon-reload
-    systemctl enable "$SERVICE_NAME"
-    "$BIN_SBC"
-
+    # 3. Aktivieren
+    $SUDO systemctl daemon-reload
+    $SUDO systemctl enable "$SERVICE_NAME"
+    
     report_status "SBC detection installed. File 'sbc_hw.cfg' created." "install_sbc_detection"
 }
 
