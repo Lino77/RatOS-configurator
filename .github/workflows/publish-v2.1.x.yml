@@ -28,7 +28,7 @@ jobs:
           echo "target-branch=v2.1.x-deployment-2" >> "$GITHUB_OUTPUT"
           echo "src-branch=v2.1.x" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ steps.variables.outputs.src-branch }}
           fetch-depth: 0
@@ -49,7 +49,7 @@ jobs:
           echo "Deploying $COUNT commits!"
           echo "commit-count=$COUNT" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22.x
 
@@ -65,7 +65,7 @@ jobs:
         shell: bash
         run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         name: Setup pnpm cache
         with:
           path: ${{ env.STORE_PATH }}
@@ -75,7 +75,7 @@ jobs:
 
       - name: Restore Next.js cache
         id: cache-nextjs-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: src/build/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('src/pnpm-lock.yaml') }}-${{ hashFiles('src/**/*.js', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx') }}
@@ -94,7 +94,7 @@ jobs:
           pnpm build:cli
 
       - name: Save Next.js cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         if: steps.cache-nextjs-restore.outputs.cache-hit != 'true'
         with:
           path: src/build/cache

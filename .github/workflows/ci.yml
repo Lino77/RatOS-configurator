@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ github.repository }}
           path: "ratos-configurator"
@@ -57,11 +57,11 @@ jobs:
         id: extract_branch
 
       - name: Install Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 22.x # Deine Tests bleiben auf 20, nur die Action-Laufzeit nutzt 24
+          node-version: 22.x 
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         name: Install pnpm
         id: pnpm-install
         with:
@@ -74,7 +74,7 @@ jobs:
         run: |
           echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@v4 # Aktualisiert von v3 auf v4
+      - uses: actions/cache@v6
         name: Setup pnpm cache
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
@@ -87,13 +87,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Checkout Klipper
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: klipper3d/klipper
           path: "klipper"
 
       - name: Checkout Moonraker
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: Arksine/moonraker
           path: "moonraker"
@@ -126,7 +126,7 @@ jobs:
         run: pnpm run test:ci --outputFile=./report.xml
 
       - name: Upload reports
-        uses: actions/upload-artifact@v4 # upload test results
+        uses: actions/upload-artifact@v6 # upload test results
         if: success() || failure() # run this step even if previous step failed
         with:
           name: test-results
