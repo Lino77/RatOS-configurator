@@ -62,9 +62,9 @@ pnpm_install() {
 			report_status "Deleting root owned node_modules"
 			rm -rf "$SRC_DIR/node_modules"
 		fi
-		sudo -u "${RATOS_USERNAME}" pnpm install --aggregate-output --no-color --config.confirmModulesPurge=false --only-built-dependencies=esbuild
+		sudo -u "${RATOS_USERNAME}" pnpm install --aggregate-output --no-color --config.confirmModulesPurge=false 
     else
-		pnpm install --aggregate-output --no-color --config.confirmModulesPurge=false --only-built-dependencies=esbuild
+		pnpm install --aggregate-output --no-color --config.confirmModulesPurge=false 
 	fi
     popd || exit 1
 }

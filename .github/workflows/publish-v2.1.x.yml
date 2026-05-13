@@ -56,8 +56,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         with:
-          version: 9.15.4
-          # Sucht automatisch nach der pnpm-lock.yaml in src/
+          version: 11.0.9
           run_install: false
 
       # Wir nutzen pnpm's eigenes Caching für die Store-Files
