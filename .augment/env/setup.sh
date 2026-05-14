@@ -7,7 +7,11 @@ PRINTER_DATA_DIR=/mnt/persist/printer_data
 CONFIGURATOR_ROOT_DIR=/mnt/persist/workspace
 
 # Install Node.js 20.x
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+#curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+#sudo apt-get install -y nodejs
+
+# Install Node.js 20.x
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash - 
 sudo apt-get install -y nodejs
 
 # Install pnpm
