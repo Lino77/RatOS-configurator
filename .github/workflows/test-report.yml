@@ -34,7 +34,7 @@ jobs:
         uses: ataylorme/eslint-annotate-action@v3 # Aktualisiert von v2 auf v3
 
       - name: Test Report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3 # Aktualisiert von v1 auf v3
         with:
           artifact: test-results
           name: Test Report
