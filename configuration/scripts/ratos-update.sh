@@ -279,159 +279,67 @@ fix_klippy_env_ownership()
 	fi
 }
 
-ensure_raspi_config_cpu_governor_default()
-{
-	log_info "Ensuring raspi-config CPU governor default configuration" "ensure_raspi_config_cpu_governor_default"
-	report_status "Ensuring raspi-config CPU governor default configuration"
+ensure_systemd_cpu_governor_performance() {
+	log_info "Ensuring systemd CPU governor performance service configuration" "ensure_systemd_cpu_governor_performance"
+	report_status "Ensuring systemd CPU governor performance service configuration"
 
-	local config_file="/etc/default/cpu_governor"
+	local service_file="/etc/systemd/system/set-governor.service"
 	local desired_governor="performance"
 
-	# Check if config file exists
-	if [ ! -f "$config_file" ]; then
-		log_info "Config file $config_file does not exist, creating with default governor: $desired_governor" "ensure_raspi_config_cpu_governor_default"
-		echo "Creating $config_file with default governor: $desired_governor"
+	# 1. Datei existiert nicht: Neu erstellen
+	if [ ! -f "$service_file" ]; then
+		log_info "Service file $service_file does not exist, creating new service" "ensure_systemd_cpu_governor_performance"
+		echo "Creating $service_file for $desired_governor governor"
 		
-		if echo "CPU_DEFAULT_GOVERNOR=\"$desired_governor\"" > "$config_file"; then
-			log_info "Created $config_file with CPU_DEFAULT_GOVERNOR=\"$desired_governor\"" "ensure_raspi_config_cpu_governor_default"
-			echo "raspi-config CPU governor default configuration created successfully"
+		# Erstellt die moderne Debian Trixie konforme Service-Unit
+		if cat <<EOF > "$service_file"
+[Unit]
+Description=Set CPU Governor to Performance
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo "performance" | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+		then
+			log_info "Created $service_file successfully" "ensure_systemd_cpu_governor_performance"
+			echo "Systemd CPU governor service created successfully"
+			
+			# Service aktivieren und sofort starten
+			systemctl daemon-reload
+			systemctl enable --now set-governor.service
 			return 0
 		else
-			log_error "Failed to create $config_file" "ensure_raspi_config_cpu_governor_default" "CONFIG_CREATE_FAILED"
-			echo "Failed to create raspi-config CPU governor configuration file"
+			log_error "Failed to create $service_file" "ensure_systemd_cpu_governor_performance" "SERVICE_CREATE_FAILED"
+			echo "Failed to create CPU governor systemd service"
 			return 1
 		fi
 	fi
 
-	# File exists, check if CPU_DEFAULT_GOVERNOR is defined
-	log_info "Config file $config_file exists, checking CPU_DEFAULT_GOVERNOR setting" "ensure_raspi_config_cpu_governor_default"
+	# 2. Datei existiert: Inhalt auf den korrekten Governor prüfen
+	log_info "Service file $service_file exists, checking configuration" "ensure_systemd_cpu_governor_performance"
 
-	# Check for active (uncommented) CPU_DEFAULT_GOVERNOR setting
-	if grep -q "^[[:space:]]*CPU_DEFAULT_GOVERNOR[[:space:]]*=" "$config_file"; then
-		# Extract the current value
-		local current_value
-		current_value=$(grep "^[[:space:]]*CPU_DEFAULT_GOVERNOR[[:space:]]*=" "$config_file" | head -n1 | sed 's/^[[:space:]]*CPU_DEFAULT_GOVERNOR[[:space:]]*=[[:space:]]*["'\'']*\([^"'\'']*\)["'\'']*.*$/\1/')
+	if grep -q "echo[[:space:]]*\"$desired_governor\"" "$service_file"; then
+		log_info "Systemd service already configured correctly for $desired_governor" "ensure_systemd_cpu_governor_performance"
+		echo "CPU governor systemd service already configured correctly: $desired_governor"
 		
-		log_info "Found active CPU_DEFAULT_GOVERNOR setting with value: $current_value" "ensure_raspi_config_cpu_governor_default"
-		
-		if [ "$current_value" = "$desired_governor" ]; then
-			log_info "CPU_DEFAULT_GOVERNOR already set to desired value: $desired_governor" "ensure_raspi_config_cpu_governor_default"
-			echo "raspi-config CPU governor default already configured correctly: $desired_governor"
-			return 0
-		else
-			log_warn "CPU_DEFAULT_GOVERNOR is set to '$current_value' but expected '$desired_governor'. Manual configuration detected, leaving as-is." "ensure_raspi_config_cpu_governor_default" "GOVERNOR_MISMATCH"
-			echo "WARNING: raspi-config CPU governor is set to '$current_value' but RatOS recommends '$desired_governor'"
-			return 0
+		# Sicherstellen, dass der Service aktiv und gestartet ist
+		if ! systemctl is-enabled --quiet set-governor.service; then
+			systemctl enable --now set-governor.service
 		fi
-	fi
-
-	# Check if there's a commented CPU_DEFAULT_GOVERNOR line
-	if grep -q "^[[:space:]]*#.*CPU_DEFAULT_GOVERNOR[[:space:]]*=" "$config_file"; then
-		log_info "Found commented CPU_DEFAULT_GOVERNOR line, uncommenting and setting to: $desired_governor" "ensure_raspi_config_cpu_governor_default"
-		echo "Uncommenting and setting CPU_DEFAULT_GOVERNOR to: $desired_governor"
-		
-		# Uncomment the first occurrence and set the value
-		if sed -i "0,/^[[:space:]]*#.*CPU_DEFAULT_GOVERNOR[[:space:]]*=/s|^[[:space:]]*#.*CPU_DEFAULT_GOVERNOR[[:space:]]*=.*|CPU_DEFAULT_GOVERNOR=\"$desired_governor\"|" "$config_file"; then
-			log_info "Successfully uncommented and set CPU_DEFAULT_GOVERNOR=\"$desired_governor\"" "ensure_raspi_config_cpu_governor_default"
-			echo "raspi-config CPU governor default configuration updated successfully"
-			return 0
-		else
-			log_error "Failed to uncomment and set CPU_DEFAULT_GOVERNOR" "ensure_raspi_config_cpu_governor_default" "CONFIG_UPDATE_FAILED"
-			echo "Failed to update raspi-config CPU governor configuration"
-			return 1
-		fi
-	fi
-
-	# No CPU_DEFAULT_GOVERNOR line found, append new line
-	log_info "No CPU_DEFAULT_GOVERNOR line found, appending to config file" "ensure_raspi_config_cpu_governor_default"
-	echo "Adding CPU_DEFAULT_GOVERNOR to configuration file"
-	
-	if echo "CPU_DEFAULT_GOVERNOR=\"$desired_governor\"" >> "$config_file"; then
-		log_info "Successfully appended CPU_DEFAULT_GOVERNOR=\"$desired_governor\"" "ensure_raspi_config_cpu_governor_default"
-		echo "raspi-config CPU governor default configuration added successfully"
 		return 0
 	else
-		log_error "Failed to append CPU_DEFAULT_GOVERNOR to config file" "ensure_raspi_config_cpu_governor_default" "CONFIG_APPEND_FAILED"
-		echo "Failed to add raspi-config CPU governor configuration"
-		return 1
-	fi
-}
-
-ensure_cpufrequtils_cpu_governor_default()
-{
-	log_info "Ensuring cpufrequtils CPU governor default configuration" "ensure_cpufrequtils_cpu_governor_default"
-	report_status "Ensuring cpufrequtils CPU governor default configuration"
-
-	local config_file="/etc/default/cpufrequtils"
-	local desired_governor="performance"
-
-	# Check if config file exists
-	if [ ! -f "$config_file" ]; then
-		log_info "Config file $config_file does not exist, creating with default governor: $desired_governor" "ensure_cpufrequtils_cpu_governor_default"
-		echo "Creating $config_file with default governor: $desired_governor"
+		# Abweichender Governor gefunden (Sicherheit/Manuelle Konfiguration berücksichtigen)
+		local current_setting
+		current_setting=$(grep -o "echo[[:space:]]*\"[^\"]*\"" "$service_file" | head -n1 | cut -d'"' -f2)
 		
-		if echo "GOVERNOR=\"$desired_governor\"" > "$config_file"; then
-			log_info "Created $config_file with GOVERNOR=\"$desired_governor\"" "ensure_cpufrequtils_cpu_governor_default"
-			echo "cpufrequtils CPU governor default configuration created successfully"
-			return 0
-		else
-			log_error "Failed to create $config_file" "ensure_cpufrequtils_cpu_governor_default" "CONFIG_CREATE_FAILED"
-			echo "Failed to create cpufrequtils CPU governor configuration file"
-			return 1
-		fi
-	fi
-
-	# File exists, check if GOVERNOR is defined
-	log_info "Config file $config_file exists, checking GOVERNOR setting" "ensure_cpufrequtils_cpu_governor_default"
-
-	# Check for active (uncommented) GOVERNOR setting
-	if grep -q "^[[:space:]]*GOVERNOR[[:space:]]*=" "$config_file"; then
-		# Extract the current value
-		local current_value
-		current_value=$(grep "^[[:space:]]*GOVERNOR[[:space:]]*=" "$config_file" | head -n1 | sed 's/^[[:space:]]*GOVERNOR[[:space:]]*=[[:space:]]*["'\'']*\([^"'\'']*\)["'\'']*.*$/\1/')
-		
-		log_info "Found active GOVERNOR setting with value: $current_value" "ensure_cpufrequtils_cpu_governor_default"
-		
-		if [ "$current_value" = "$desired_governor" ]; then
-			log_info "GOVERNOR already set to desired value: $desired_governor" "ensure_cpufrequtils_cpu_governor_default"
-			echo "cpufrequtils CPU governor default already configured correctly: $desired_governor"
-			return 0
-		else
-			log_warn "GOVERNOR is set to '$current_value' but expected '$desired_governor'. Manual configuration detected, leaving as-is." "ensure_cpufrequtils_cpu_governor_default" "GOVERNOR_MISMATCH"
-			echo "WARNING: cpufrequtils CPU governor is set to '$current_value' but RatOS recommends '$desired_governor'"
-			return 0
-		fi
-	fi
-
-	# Check if there's a commented GOVERNOR line
-	if grep -q "^[[:space:]]*#.*GOVERNOR[[:space:]]*=" "$config_file"; then
-		log_info "Found commented GOVERNOR line, uncommenting and setting to: $desired_governor" "ensure_cpufrequtils_cpu_governor_default"
-		echo "Uncommenting and setting GOVERNOR to: $desired_governor"
-		
-		# Uncomment the first occurrence and set the value
-		if sed -i "0,/^[[:space:]]*#.*GOVERNOR[[:space:]]*=/s|^[[:space:]]*#.*GOVERNOR[[:space:]]*=.*|GOVERNOR=\"$desired_governor\"|" "$config_file"; then
-			log_info "Successfully uncommented and set GOVERNOR=\"$desired_governor\"" "ensure_cpufrequtils_cpu_governor_default"
-			echo "cpufrequtils CPU governor default configuration updated successfully"
-			return 0
-		else
-			log_error "Failed to uncomment and set GOVERNOR" "ensure_cpufrequtils_cpu_governor_default" "CONFIG_UPDATE_FAILED"
-			echo "Failed to update cpufrequtils CPU governor configuration"
-			return 1
-		fi
-	fi
-
-	# No GOVERNOR line found, append new line
-	log_info "No GOVERNOR line found, appending to config file" "ensure_cpufrequtils_cpu_governor_default"
-	echo "Adding GOVERNOR to configuration file"
-	
-	if echo "GOVERNOR=\"$desired_governor\"" >> "$config_file"; then
-		log_info "Successfully appended GOVERNOR=\"$desired_governor\"" "ensure_cpufrequtils_cpu_governor_default"
-		echo "cpufrequtils CPU governor default configuration added successfully"
+		log_warn "Systemd service is set to '$current_setting' but expected '$desired_governor'. Manual configuration detected, leaving as-is." "ensure_systemd_cpu_governor_performance" "GOVERNOR_MISMATCH"
+		echo "WARNING: CPU governor service is set to '$current_setting' but RatOS recommends '$desired_governor'"
 		return 0
-	else
-		log_error "Failed to append GOVERNOR to config file" "ensure_cpufrequtils_cpu_governor_default" "CONFIG_APPEND_FAILED"
-		echo "Failed to add cpufrequtils CPU governor configuration"
-		return 1
 	fi
 }
 
@@ -572,8 +480,7 @@ main() {
 	ensure_sudo_command_whitelisting || exit_code=1
 	ensure_service_permission || exit_code=1
 	ensure_node_24 || exit_code=1
-	ensure_raspi_config_cpu_governor_default || exit_code=1
-	ensure_cpufrequtils_cpu_governor_default || exit_code=1
+	ensure_systemd_cpu_governor_performance || exit_code=1
 	ensure_cpu_governor_active || exit_code=1
 	fix_klippy_env_ownership || exit_code=1
 	ensure_pip_requirements || exit_code=1
