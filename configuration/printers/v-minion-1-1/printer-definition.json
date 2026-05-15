@@ -1,6 +1,6 @@
 {
 	"$schema": "../printer-definition.schema.json",
-	"name": "V-Minion",
+	"name": "V-Minion 1.1",
 	"description": "A small 180x180x180mm bed slinger from Rat Rig",
 	"manufacturer": "Rat Rig",
 	"documentationLink": "https://os.ratrig.com/docs/printers/v-minion",
@@ -34,13 +34,14 @@
 	},
 	"defaults": {
 		"board": "btt-skrat-10",
+		"chamberLighting": { "id": "dayspring", "connectedTo": "controlboard" },
 		"toolheads": [
 			{
 				"axis": "x",
 				"extruder": "orbiter-2",
 				"toolboard": "btt-ebb42-12",
 				"hotend": "rapido-plus-uhf",
-				"partFan": "4pin",
+				"partFan": "4pin-dedicated",
 				"hotendFan": "2pin-toolboard",
 				"probe": "superpinda",
 				"xEndstop": "endstop",
