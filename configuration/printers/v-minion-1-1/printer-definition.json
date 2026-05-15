@@ -4,7 +4,7 @@
 	"description": "A small 180x180x180mm bed slinger from Rat Rig",
 	"manufacturer": "Rat Rig",
 	"documentationLink": "https://os.ratrig.com/docs/printers/v-minion",
-	"image": "v-minion.png",
+	"image": "v-minion-1-1.png",
 	"template": "v-minion-printer.template.cfg",
 	"driverCountRequired": 4,
 	"sizes": {
