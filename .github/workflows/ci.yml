@@ -16,6 +16,7 @@ on:
     branches:
       - "development"
       - "v2.1.x"
+      - "v3.0.x"
       - "monorepo"
       - "**/devpub/**"
   pull_request:

@@ -1,0 +1,121 @@
+name: Publish to v3.0.x-deployment-2
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: ["v3.0.x"]
+    types:
+      - completed
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+# Erzwingt die Node.js 24 Laufzeit für alle Actions
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and Push
+    if: github.event.workflow_run.conclusion == 'success'
+    
+    steps:
+      - name: Set variables
+        id: variables
+        shell: bash
+        run: |
+          echo "target-branch=v3.0.x-deployment-2" >> "$GITHUB_OUTPUT"
+          echo "src-branch=v3.0.x" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.variables.outputs.src-branch }}
+          fetch-depth: 0
+
+      - name: Get last successful commit
+        id: last-successful-commit
+        uses: nickderobertis/last-successful-commit-action@v1
+        with:
+          workflow-id: publish-v3.0.x.yml
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.variables.outputs.src-branch }}
+
+      - name: Get commit count
+        id: commit-count
+        shell: bash
+        run: |
+          COUNT=$(git rev-list --count ${{ steps.last-successful-commit.outputs.commit-sha }}..${{ github.sha }})
+          echo "Deploying $COUNT commits!"
+          echo "commit-count=$COUNT" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 11.0.9
+          run_install: false
+
+      # Wir nutzen pnpm's eigenes Caching für die Store-Files
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v5
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Restore Next.js cache
+        id: cache-nextjs-restore
+        uses: actions/cache/restore@v5
+        with:
+          path: src/build/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('src/pnpm-lock.yaml') }}-${{ hashFiles('src/**/*.js', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('src/pnpm-lock.yaml') }}-
+            ${{ runner.os }}-nextjs-
+
+      - name: Install all dependencies
+        working-directory: ./src
+        run: |
+          pnpm install --frozen-lockfile --aggregate-output 
+
+      - name: Build
+        working-directory: ./src
+        run: |
+          pnpm build
+          pnpm build:cli
+
+      - name: Save Next.js cache
+        uses: actions/cache/save@v5
+        if: steps.cache-nextjs-restore.outputs.cache-hit != 'true'
+        with:
+          path: src/build/cache
+          # Expliziter Key für den Fall eines Erst-Runs
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('src/pnpm-lock.yaml') }}-${{ hashFiles('src/**/*.js', 'src/**/*.jsx', 'src/**/*.ts', 'src/**/*.tsx') }}
+
+      - name: Cleanup and Prepare Deployment
+        run: |
+          cd src
+          rm -rf __tests__ app pages components coverage data helpers hooks moonraker env recoil server utils zods test-setup.ts test-setup-global.ts vitest.config.mts tsconfig.vitest.json copy-files-from-to.json components.json postcss.config.js prettier.config.mjs tailwind.config.ts
+          cd ..
+          mv src app
+          # Falls .env nicht existiert, sed Fehler vermeiden:
+          [ -f app/.env ] && sed -i 's|/src/scripts|/app/scripts|g' app/.env || echo ".env not found"
+
+      - name: Publish to ${{ steps.variables.outputs.target-branch }}
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: .
+          commit-message: |
+            Deployed ${{ steps.commit-count.outputs.commit-count }} commit(s).
+            Diff: https://github.com/Rat-OS/RatOS-configurator/compare/${{ steps.last-successful-commit.outputs.commit-sha }}...${{ github.sha }}
+          git-config-name: github-actions[bot]
+          git-config-email: 41898282+github-actions[bot]@users.noreply.github.com
+          branch: ${{ steps.variables.outputs.target-branch }} # The branch name where you want to push the assets
