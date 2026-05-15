@@ -5,7 +5,7 @@
 	"manufacturer": "Rat Rig",
 	"documentationLink": "https://os.ratrig.com/docs/printers/v-minion",
 	"image": "v-minion-1-1.png",
-	"template": "v-minion-printer.template.cfg",
+	"template": "v-minion-1-1-printer.template.cfg", 
 	"driverCountRequired": 4,
 	"sizes": {
 		"180": {
