@@ -235,6 +235,7 @@ ensure_service_permission()
         "crowsnest"
         "octoeverywhere"
         "ratos-configurator"
+		"helixscreen"
     )
     
     # Create file if it doesn't exist
