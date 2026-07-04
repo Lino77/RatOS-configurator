@@ -30,24 +30,24 @@ declare namespace __next_route_internal_types__ {
 
   type StaticRoutes = 
     | `/api/dfu-image`
-    | `/api/mcu-image`
     | `/api/download-firmware`
+    | `/api/mcu-image`
     | `/api/printer-image`
-    | `/api/update-logs/generate-test-data`
     | `/api/update-logs/download`
+    | `/api/update-logs/generate-test-data`
     | `/`
-    | `/motion`
-    | `/update-logs`
     | `/calibration`
-    | `/wizard`
+    | `/motion`
     | `/toolhead`
-    | `/analysis/macros/new`
+    | `/update-logs`
+    | `/wizard`
     | `/analysis`
+    | `/analysis/macros/new`
     | `/analysis/macros`
   type DynamicRoutes<T extends string = string> = 
     | `/api/trpc/${SafeSlug<T>}`
-    | `/analysis/macros/${SafeSlug<T>}/edit`
     | `/analysis/macros/${SafeSlug<T>}`
+    | `/analysis/macros/${SafeSlug<T>}/edit`
     | `/analysis/macros/${SafeSlug<T>}/recordings/${SafeSlug<T>}`
     | `/analysis/macros/${SafeSlug<T>}/recordings`
 
