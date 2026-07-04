@@ -1,4 +1,4 @@
-"use strict";exports.id=924,exports.ids=[924,7926],exports.modules={97926:(e,r,t)=>{t.d(r,{j:()=>getLogger});var o=t(58545),a=t.n(o),n=t(74169),i=t(68171),s=t(57147),l=t(71017),d=t.n(l);let c=null,getLogger=()=>{if(null!=c)return c;let e=n.Rz.parse(process.env),r=(0,s.existsSync)(d().dirname(e.LOG_FILE)),t="/var/log/ratos-server.log",o=r?e.LOG_FILE:t;return r||((0,s.existsSync)(d().dirname(t))||console.warn("Neither configured nor fallback log directories exist. Logging may fail."),console.warn("server logger logFile directory does not exist, using default",o)),c=a()({...i.N,transport:{target:"pino/file",options:{destination:o,append:!0}}})}},60924:(e,r,t)=>{t.r(r),t.d(r,{getRequiredPinAliases:()=>getRequiredPinAliases,getUpdatedCrowsnestConfigurationForVaoc:()=>getUpdatedCrowsnestConfigurationForVaoc,renderTemplate:()=>renderTemplate});var o=t(74169),a=t(31452),n=t(97926),i=t(57147),s=t(71017),l=t.n(s);let getRequiredPinAliases=e=>["ratrig_vaoc_probe_pin","ratrig_vaoc_led_pin","ratrig_vaoc_fan_pin"],renderTemplate=e=>{switch(e.section){case"hardware":let r=getUpdatedCrowsnestConfigurationForVaoc();return e.extrasGenerator.addFileToRender({fileName:"crowsnest.conf",content:r,overwrite:!1}),`
+"use strict";exports.id=924,exports.ids=[924,7926],exports.modules={97926:(e,r,t)=>{t.d(r,{j:()=>getLogger});var o=t(58545),a=t.n(o),n=t(74169),i=t(68171),s=t(57147),c=t(71017),d=t.n(c);let l=null,getLogger=()=>{if(null!=l)return l;let e=n.Rz.parse(process.env),r=(0,s.existsSync)(d().dirname(e.LOG_FILE)),t="/var/log/ratos-server.log",o=r?e.LOG_FILE:t;return r||((0,s.existsSync)(d().dirname(t))||console.warn("Neither configured nor fallback log directories exist. Logging may fail."),console.warn("server logger logFile directory does not exist, using default",o)),l=a()({...i.N,transport:{target:"pino/file",options:{destination:o,append:!0}}})}},60924:(e,r,t)=>{t.r(r),t.d(r,{getRequiredPinAliases:()=>getRequiredPinAliases,getUpdatedCrowsnestConfigurationForVaoc:()=>getUpdatedCrowsnestConfigurationForVaoc,renderTemplate:()=>renderTemplate});var o=t(74169),a=t(31452),n=t(97926),i=t(57147),s=t(71017),c=t.n(s);let getRequiredPinAliases=e=>["ratrig_vaoc_probe_pin","ratrig_vaoc_led_pin","ratrig_vaoc_fan_pin"],renderTemplate=e=>{switch(e.section){case"hardware":let r=getUpdatedCrowsnestConfigurationForVaoc();return e.extrasGenerator.addFileToRender({fileName:"crowsnest.conf",content:r,overwrite:!0}),`
 ###########################
 # RatRig VAOC configuration
 ###########################
@@ -38,7 +38,7 @@ pin: ${e.getPrefixedPinFromAlias("ratrig_vaoc_fan_pin")}
 heater: heater_bed
 fan_speed: 1.0
 heater_temp: 50
-`;case"config-helpers":let t="ratos_generated/dc-endstop.cfg",o=e.extrasGenerator.isOverwriteRequestedForFile(t),a=getCommonBoilerplateConfigurationFileContent(o,t,"CONFIGURE_DC_ENDSTOP");e.extrasGenerator.addFileToRender({fileName:t,content:a,overwrite:o});let n="ratos_generated/adjust-y-max.cfg",i=e.extrasGenerator.isOverwriteRequestedForFile(n),s=getCommonBoilerplateConfigurationFileContent(i,n,"INCREASE_Y_MAX");return e.extrasGenerator.addFileToRender({fileName:n,content:s,overwrite:i}),`
+`;case"config-helpers":let t="ratos_generated/dc-endstop.cfg",o=getCommonBoilerplateConfigurationFileContent(t,"CONFIGURE_DC_ENDSTOP");e.extrasGenerator.addFileToRender({fileName:t,content:o,overwrite:!0});let a="ratos_generated/adjust-y-max.cfg",n=getCommonBoilerplateConfigurationFileContent(a,"INCREASE_Y_MAX");return e.extrasGenerator.addFileToRender({fileName:a,content:n,overwrite:!0}),`
 ########################################
 # Configuration Helpers for Rat Rig VAOC
 ########################################
@@ -48,19 +48,15 @@ heater_temp: 50
 #
 [include ratos_generated/dc-endstop.cfg]   # Managed by CONFIGURE_DC_ENDSTOP macro
 [include ratos_generated/adjust-y-max.cfg] # Managed by INCREASE_Y_MAX macro
-`;default:throw Error(`Unknown purpose '${e.section}' for template rendering.`)}};function getUpdatedCrowsnestConfigurationForVaoc(){let e=o.Rz.parse(process.env),r=l().join(e.KLIPPER_CONFIG_PATH,"crowsnest.conf");return(0,a.zM)(r,[{section:"crowsnest",body:`log_path: /home/pi/printer_data/logs/crowsnest.log
-log_level: verbose
-delete_log: false
-no_proxy: false
-`.trim()},{section:"cam 1",body:`# Required for Rat Rig VAOC camera integration, DO NOT MODIFY THIS SECTION.
+`;default:throw Error(`Unknown purpose '${e.section}' for template rendering.`)}};function getUpdatedCrowsnestConfigurationForVaoc(){let e=o.Rz.parse(process.env),r=c().join(e.KLIPPER_CONFIG_PATH,"crowsnest.conf");return(0,a.zM)(r,[{section:"cam 1",body:`# Required for Rat Rig VAOC camera integration, DO NOT MODIFY THIS SECTION.
 mode: camera-streamer
 enable_rtsp: false
 rtsp_port: 8554
 port: 8080
-device: /dev/video0
+device: /dev/RatOS/rr-vaoc-camera
 resolution: 1920x1080
 max_fps: 30
-`.trim()}])}function getCommonBoilerplateConfigurationFileContent(e,r,t){let a=o.Rz.parse(process.env),s=l().join(a.KLIPPER_CONFIG_PATH,r),d=(0,i.existsSync)(s);return((0,n.j)().debug(`getting content for ${r}, exists=${d}, forceDefault=${e}`),e||!d)?`# WARNING. THIS FILE IS GENERATED BY RATOS AND
-# WILL BE UPDATED BY THE ${t} MACRO.
+`.trim()}])}function getCommonBoilerplateConfigurationFileContent(e,r){let t=o.Rz.parse(process.env),a=c().join(t.KLIPPER_CONFIG_PATH,e),s=(0,i.existsSync)(a);return((0,n.j)().debug(`getting content for ${e}, exists=${s}`),s)?(0,i.readFileSync)(a,"utf-8"):`# WARNING. THIS FILE IS GENERATED BY RATOS AND
+# WILL BE UPDATED BY THE ${r} MACRO.
 # DO NOT DELETE OR MODIFY THIS FILE.
-`:(0,i.readFileSync)(s,"utf-8")}}};
+`}}};
