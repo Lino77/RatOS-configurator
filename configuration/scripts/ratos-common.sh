@@ -40,8 +40,8 @@ report_status()
 install_sbc_detection() {
     report_status "Installing SBC detection service"
     
-    local BIN_SBC="/usr/local/bin/klipper-sbc-detect.sh"
-    local SERVICE_NAME="klipper-sbc-detect.service"
+    local BIN_SBC="/usr/local/bin/sbc-detect.sh"
+    local SERVICE_NAME="sbc-detect.service"
 
     # 1. Das Erkennungs-Skript mit sudo erstellen
     cat <<'EOF' | $SUDO tee "$BIN_SBC" > /dev/null
@@ -235,6 +235,7 @@ ensure_service_permission()
         "crowsnest"
         "octoeverywhere"
         "ratos-configurator"
+		"helixscreen"
     )
     
     # Create file if it doesn't exist
